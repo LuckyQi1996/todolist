@@ -13,9 +13,29 @@
 
 ---
 
+## 🎯 项目来源
+
+本项目基于 [Ricocc](https://ricocc.com) 的 [Uiineed Todo List](https://github.com/ricocc/uiineed-todo-list) 项目进行深度优化和功能扩展。
+
+### 🔗 原项目信息
+- **作者**: [Ricocc](https://ricocc.com)
+- **原项目地址**: https://github.com/ricocc/uiineed-todo-list
+- **原项目文档**: https://ricocc.com/todo/
+
+### 🚀 主要改进
+- ✅ **后端架构**: 新增完整的 Spring Boot 后端服务
+- ✅ **用户认证**: 集成微信扫码登录和 JWT 认证
+- ✅ **云端同步**: 支持多设备数据同步
+- ✅ **性能优化**: Redis 缓存和数据库性能优化
+- ✅ **容器化**: Docker + Docker Compose 部署
+- ✅ **安全增强**: 完善的安全配置和异常处理
+- ✅ **文档完善**: 详细的架构文档和 API 文档
+
+---
+
 ## 📋 项目概述
 
-Uiineed Todo List 是一个现代化的待办事项管理应用，提供两种使用模式：
+这是一个现代化的待办事项管理应用，提供两种使用模式：
 
 🏠 **纯前端模式** - 无需安装，数据本地存储，开箱即用
 ☁️ **云端模式** - 用户认证，数据同步，多设备访问
@@ -48,8 +68,8 @@ Uiineed Todo List 是一个现代化的待办事项管理应用，提供两种�
 2. **启动服务**
    ```bash
    # 配置环境变量
-   export WECHAT_OPEN_APP_ID="your_app_id"
-   export WECHAT_OPEN_APP_SECRET="your_app_secret"
+   cp .env.example .env
+   # 编辑 .env 文件，配置微信和数据库信息
 
    # 启动所有服务
    docker-compose up -d
@@ -112,10 +132,10 @@ Uiineed Todo List 是一个现代化的待办事项管理应用，提供两种�
 
 ## 🎨 设计理念
 
-- **极简主义** - 专注核心功能，去除冗余
-- **用户友好** - 直观的界面，流畅的体验
-- **性能优先** - 快速响应，低资源占用
-- **隐私保护** - 本地存储，数据安全
+- **极简主义**: 专注核心功能，去除冗余
+- **用户友好**: 直观的界面，流畅的体验
+- **性能优先**: 快速响应，低资源占用
+- **隐私保护**: 本地存储，数据安全
 
 ## 📁 项目结构
 
@@ -172,11 +192,6 @@ uiineed-todo-list/
 </div>
 ```
 
-## 🌐 在线体验
-
-- **中文版**: [https://ricocc.com/todo/](https://ricocc.com/todo/)
-- **英文版**: [https://ricocc.com/todo-en/](https://ricocc.com/todo-en/)
-
 ## 🤝 贡献指南
 
 欢迎贡献代码、报告问题或提出建议！
@@ -199,7 +214,7 @@ uiineed-todo-list/
 
 <div align="center">
 
-**Made with ❤️ by [Ricocc](https://ricocc.com)**
+**感谢 [Ricocc](https://ricocc.com) 提供的原始项目**
 
 </div>
 
@@ -209,19 +224,13 @@ uiineed-todo-list/
 
 [📍 English Intro Click Here](#english-intro)
 
-Uiineed Todo List 是一个极简主义的待办事项管理应用。在工作时使用 Todo List 是非常常见的，市面上的 Todo List 类产品非常多，无论是电脑端的应用还是手机端的 APP、小程序等，而且也考虑用户的多样化需求，开发了各种功能，还有一些社交属性，有些还免不了广告的存在。
+本项目基于 Ricocc 的 Uiineed Todo List 进行深度优化开发。原项目是一个极简主义的待办事项管理应用，具有以下特点：
 
-我个人的产品诉求是：基础、干净简洁、不需要额外功能、视觉合格。
+- **设计理念**: 基础、干净简洁、不需要额外功能、视觉合格
+- **技术实现**: Vue 2.x 和 Sass，使用 base64 减少文件数量
+- **设计参考**: Figma 社区 aakarshna 的 Noted 设计规范
 
-所以不如尝试自己写一个 Todo List 应用，既可以满足自己每天不同的想法和需求，也可以自己决定视觉风格，无论多么奇葩，只要自己喜欢就行。
-
-在设计上，我参考了 Figma 社区 aakarshna 的 Noted 设计规范，并根据自己的设计做了调整。在前端上使用了 Vue 2.x 和 Sass，尽量使用 base64 减少文件数量。
-
-### 使用说明
-
-在使用上为了尽量简洁，我使用了 CDN 的形式引入Vue，不需要安装，下载完直接打开 `html` 文件即可使用。
-
-**特色功能：**
+### 主要功能
 - 📝 基础的待办事项管理
 - 🎨 简洁优雅的设计
 - 📱 完美适配移动端
@@ -231,6 +240,16 @@ Uiineed Todo List 是一个极简主义的待办事项管理应用。在工作�
 - 🔄 拖拽排序
 - 🗂️ 分类管理
 
-**线上地址：**
-- 中文版：https://ricocc.com/todo/
-- 英文版：https://ricocc.com/todo-en/
+### 本项目增强
+在保留原有简洁设计的基础上，本项目新增了：
+- 🔐 用户认证系统
+- ☁️ 云端数据同步
+- 🚀 性能优化
+- 🛡️ 安全加固
+- 📦 容器化部署
+- 📚 完善文档
+
+### 原项目地址
+- GitHub: https://github.com/ricocc/uiineed-todo-list
+- 中文版: https://ricocc.com/todo/
+- 英文版: https://ricocc.com/todo-en/
