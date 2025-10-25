@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 - Uiineed Todo List</title>
+    <link href="public/css/normalize.css" rel="stylesheet" media="screen">
+    <link href="public/css/style.css" rel="stylesheet" media="screen">
+    <style>
+        .login-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: var(--body-bg);
+            padding: 40px 20px;
+        }
+
+        .login-box {
+            background: #fff;
+            box-shadow: var(--box-shadow);
+            border: var(--border);
+            border-radius: var(--border-radius);
+            padding: 40px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .login-title {
+            font-size: 32px;
+            font-weight: 800;
+            -webkit-text-stroke: 2px var(--black);
+            color: var(--bg-normal);
+            text-shadow: 4px 4px 0 var(--font-color);
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .login-title img {
+            width: 40px;
+            height: auto;
+        }
+
+        .qr-container {
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .qr-code {
+            width: 200px;
+            height: 200px;
+            border: var(--border);
+            border-radius: var(--border-radius);
+            margin: 0 auto;
+            background: #fff;
+        }
+
+        .qr-code img {
+            width: 100%;
+            height: 100%;
+            border-radius: var(--border-radius);
+        }
+
+        .qr-loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 200px;
+            color: var(--font-color);
+        }
+
+        .qr-error {
+            color: #ff4444;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .login-tips {
+            margin-top: 20px;
+            font-size: 14px;
+            color: var(--placeholder);
+            line-height: 1.6;
+        }
+
+        .login-tips h3 {
+            margin-bottom: 10px;
+            font-size: 16px;
+            color: var(--font-color);
+        }
+
+        .login-tips ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .login-tips li {
+            margin: 5px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .login-tips li:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: var(--normal);
+        }
+
+        .refresh-btn {
+            margin-top: 20px;
+            padding: var(--btn-small-padding);
+            border: var(--border);
+            border-radius: var(--border-radius);
+            background: var(--bg-submit);
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.25s;
+        }
+
+        .refresh-btn:hover {
+            box-shadow: var(--box-shadow);
+            transform: translate(-2px, -2px);
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--placeholder);
+            border-top: 4px solid var(--normal);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <div class="login-title">
+                <img src="public/img/todo.svg" alt="Todo" draggable="false">
+                <span>Todo List</span>
+            </div>
+
+            <div class="qr-container">
+                <div id="qr-loading" class="qr-loading">
+                    <div class="loading-spinner"></div>
+                    <p>正在生成登录二维码...</p>
+                </div>
+                <div id="qr-code" class="qr-code" style="display: none;">
+                    <!-- 二维码将在这里显示 -->
+                </div>
+                <div id="qr-error" class="qr-error" style="display: none;">
+                    <p>生成二维码失败，请重试</p>
+                </div>
+            </div>
+
+            <button id="refresh-btn" class="refresh-btn" style="display: none;" onclick="refreshQRCode()">
+                刷新二维码
+            </button>
+
+            <div class="login-tips">
+                <h3>使用说明</h3>
+                <ul>
+                    <li>请使用微信扫描上方二维码登录</li>
+                    <li>扫描后在微信中确认授权</li>
+                    <li>登录成功后将自动跳转到待办事项页面</li>
+                    <li>如遇到问题，请刷新重试</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script src="frontend/api-service.js"></script>
+    <script>
+        let pollInterval = null;
+        let loginState = null;
+
+        // 页面加载完成后生成二维码
+        document.addEventListener('DOMContentLoaded', function() {
+            generateQRCode();
+        });
+
+        /**
+         * 生成登录二维码
+         */
+        async function generateQRCode() {
+            try {
+                showLoading();
+
+                const response = await window.apiService.getLoginQrCode();
+
+                if (response.code === 200) {
+                    displayQRCode(response.data);
+                    loginState = response.data.state;
+                    startPolling();
+                } else {
+                    showError(response.message || '生成二维码失败');
+                }
+            } catch (error) {
+                console.error('生成二维码失败:', error);
+                showError('网络错误，请检查网络连接后重试');
+            }
+        }
+
+        /**
+         * 显示二维码
+         */
+        function displayQRCode(data) {
+            const qrLoading = document.getElementById('qr-loading');
+            const qrCode = document.getElementById('qr-code');
+            const qrError = document.getElementById('qr-error');
+            const refreshBtn = document.getElementById('refresh-btn');
+
+            qrLoading.style.display = 'none';
+            qrError.style.display = 'none';
+            qrCode.style.display = 'block';
+            refreshBtn.style.display = 'block';
+
+            qrCode.innerHTML = `<img src="${data.qrCode}" alt="登录二维码">`;
+        }
+
+        /**
+         * 显示加载状态
+         */
+        function showLoading() {
+            const qrLoading = document.getElementById('qr-loading');
+            const qrCode = document.getElementById('qr-code');
+            const qrError = document.getElementById('qr-error');
+            const refreshBtn = document.getElementById('refresh-btn');
+
+            qrLoading.style.display = 'flex';
+            qrCode.style.display = 'none';
+            qrError.style.display = 'none';
+            refreshBtn.style.display = 'none';
+        }
+
+        /**
+         * 显示错误信息
+         */
+        function showError(message) {
+            const qrLoading = document.getElementById('qr-loading');
+            const qrCode = document.getElementById('qr-code');
+            const qrError = document.getElementById('qr-error');
+            const refreshBtn = document.getElementById('refresh-btn');
+
+            qrLoading.style.display = 'none';
+            qrCode.style.display = 'none';
+            qrError.style.display = 'block';
+            refreshBtn.style.display = 'block';
+
+            qrError.innerHTML = `<p>${message}</p>`;
+        }
+
+        /**
+         * 开始轮询登录状态
+         */
+        function startPolling() {
+            // 停止之前的轮询
+            if (pollInterval) {
+                clearInterval(pollInterval);
+            }
+
+            pollInterval = setInterval(async () => {
+                try {
+                    // 检查是否已经登录成功
+                    const currentUser = window.apiService.getCurrentUser();
+                    if (currentUser) {
+                        clearInterval(pollInterval);
+                        // 登录成功，跳转到主页面
+                        window.location.href = 'index.html';
+                    }
+                } catch (error) {
+                    console.error('轮询登录状态失败:', error);
+                }
+            }, 3000); // 每3秒检查一次
+        }
+
+        /**
+         * 刷新二维码
+         */
+        function refreshQRCode() {
+            if (pollInterval) {
+                clearInterval(pollInterval);
+            }
+            generateQRCode();
+        }
+
+        /**
+         * 处理微信登录回调
+         */
+        async function handleWechatCallback() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            const state = urlParams.get('state');
+
+            if (code && state) {
+                try {
+                    showLoading();
+                    const loginData = await window.apiService.wechatCallback(code, state);
+
+                    // 登录成功，跳转到主页面
+                    window.location.href = 'index.html';
+                } catch (error) {
+                    console.error('微信登录失败:', error);
+                    showError('登录失败: ' + error.message);
+                }
+            }
+        }
+
+        // 检查是否是微信回调
+        if (window.location.search) {
+            handleWechatCallback();
+        }
+
+        // 监听登出事件
+        window.addEventListener('userLogout', function() {
+            // 如果在其他页面登出，重定向到登录页
+            if (!window.location.pathname.includes('login.html')) {
+                window.location.href = 'login.html';
+            }
+        });
+    </script>
+</body>
+</html>
